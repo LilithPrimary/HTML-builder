@@ -7,13 +7,15 @@ const rl = readline.createInterface({ input: process.stdin, output:process.stdou
 let writeStream;
 
 rl.question("Input file name\n", (ans) => {
+  checkText (ans);
   writeStream = fs.createWriteStream(path.join(__dirname, `${ans}.txt`));
-  console.log(`Your file is ${ans}.txt`);
+  console.log(`\nYour file is ${ans}.txt\n`);
   askQuestion(ans);
 })
 
 function askQuestion(filename) {
   rl.question(`Input text for writing in ${filename}.txt\n`, (ans) => {
+    checkText (ans);
     writeStream.write(ans + "\n");
     askQuestion(filename);
   })
@@ -24,3 +26,10 @@ rl.on("SIGINT", () => {
   console.log("\nУдачи в нашем нелёгком деле =)\n");
   process.exit();
 });
+
+function checkText(text) {
+  if (text === "exit") {
+    console.log("\nУдачи в нашем нелёгком деле =)\n");
+    process.exit();
+  }
+}

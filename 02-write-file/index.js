@@ -1,31 +1,58 @@
-const process = require("process");
-const readline = require('readline');
-const fs = require("fs");
 const path = require('path');
+const readline = require('readline');
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+const {stdin, stdout} = process;
+const fs = require("fs");
 
-const rl = readline.createInterface({ input: process.stdin, output:process.stdout });
-let writeStream;
+fs.access(path.join(__dirname, `text.txt`), (err) => {
+  if (err) {
+    writeStream = fs.createWriteStream(path.join(__dirname, `text.txt`));
+    addText();
+  } else {
+    rl.question("text.txt is already exist. Do you want to remove this file? (y/n)\nIn case 'no' your text will be added to existing file ", (ans) => {
+      switch (ans) {
+        case "y":
+          fs.unlink(path.join(__dirname, `text.txt`), (err) =>  {
+            if (err) {
+              stdout.write("Something went wrong");
+              process.exit();
+            } else {
+              stdout.write("file removed \n");
+              writeStream = fs.createWriteStream(path.join(__dirname, `text.txt`));
+              addText();
+            }
+          });
+          break;
+        case "n":
+          addText();
+          break;
+        default:
+          stdout.write("You should input y or n");
+          process.exit();
+      }
+    })
+  }
 
-rl.question("Input file name\n", (ans) => {
-  checkText (ans);
-  writeStream = fs.createWriteStream(path.join(__dirname, `${ans}.txt`));
-  console.log(`\nYour file is ${ans}.txt\n`);
-  askQuestion(ans);
 })
 
-function askQuestion(filename) {
-  rl.question(`Input text for writing in ${filename}.txt\n`, (ans) => {
-    checkText (ans);
-    writeStream.write(ans + "\n");
-    askQuestion(filename);
+function addText () {
+  stdout.write("Input your text here: \n");
+  rl.on("line", (text) => {
+    checkText(text);
+    fs.appendFile(path.join(__dirname, `text.txt`), text + "\n", (err) => {
+      if (err) return;
+    })
   })
 }
 
-//Эта дурацкая команда не работает в консоли баша в вскоде. Проверьте, плиз, в cmd или power shell (хотя можт это у меня не работает, а у вас всё ок будет)
 rl.on("SIGINT", () => {
   console.log("\nУдачи в нашем нелёгком деле =)\n");
   process.exit();
-});
+})
+
 
 function checkText(text) {
   if (text === "exit") {

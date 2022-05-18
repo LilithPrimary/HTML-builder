@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+
 const oldPath = path.join(__dirname, 'files');
 const newPath = path.join(__dirname, 'files-copy');
 

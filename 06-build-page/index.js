@@ -18,24 +18,30 @@ fs.access(targDir, async (err) => {
   }
 });
 
-async function bundleHTML() {
-  let HTML = await fsProm.readFile(path.resolve(__dirname, 'template.html'), 'utf-8');
-  let files = await fsProm.readdir(htmlDir, {withFileTypes: true});
-  let components = {};
-  for (let el of files) {
-    if(el.isFile()) {
-      const filePath = path.resolve(htmlDir, el.name);
-      if (path.extname(filePath) === '.html') {
-        components[path.parse(filePath).name] = await fsProm.readFile(filePath, 'utf-8');
-      }
-    }
-  }
-  while(HTML.indexOf('{{') !== -1) {
+function checkHTML(HTML) {
+  if(HTML.indexOf('{{') !== -1) {
     const start = HTML.indexOf('{{');
     const end = HTML.indexOf('}}');
-    HTML = HTML.replace(HTML.slice(start - 4, end + 2), components[HTML.slice(start + 2, end)]);
+    const readStream = fs.createReadStream(path.resolve(htmlDir, `${HTML.slice(start + 2, end)}.html`), 'utf-8');
+    let component = '';
+    readStream.on('data', (chunk) => component += chunk);
+    readStream.on('end', () => {
+      HTML = HTML.replace(HTML.slice(start - 4, end + 2), component);
+      checkHTML(HTML);
+    });
+  } else {
+    const writeStream = fs.createWriteStream(path.resolve(targDir, 'index.html'), 'utf-8');
+    writeStream.write(HTML);
   }
-  await fsProm.writeFile(path.resolve(targDir, 'index.html'), HTML);
+}
+
+async function bundleHTML() {
+  let readStream = fs.createReadStream(path.resolve(__dirname, 'template.html'), 'utf-8');
+  let HTML = '';
+  readStream.on('data', (chunk) => HTML += chunk);
+  readStream.on('end', () => {
+    checkHTML(HTML);
+  });
 }
 
 function fileCopy (curDir, targDir, file) {

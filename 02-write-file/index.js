@@ -17,6 +17,7 @@ fs.access(path.join(__dirname, 'text.txt'), (err) => {
     addText();
   } else {
     rl.question('text.txt is already exist. Do you want to remove this file? (y/n)\nIn case \'no\' your text will be added to existing file ', (ans) => {
+      checkText(ans);
       switch (ans) {
       case 'y':
         fs.unlink(path.join(__dirname, 'text.txt'), (err) =>  {

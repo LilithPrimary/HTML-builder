@@ -18,7 +18,7 @@ fs.access(targDir, async (err) => {
   }
 });
 
-async function workWithHTML() {
+async function bundleHTML() {
   let HTML = await fsProm.readFile(path.resolve(__dirname, 'template.html'), 'utf-8');
   let files = await fsProm.readdir(htmlDir, {withFileTypes: true});
   let components = {};
@@ -71,7 +71,7 @@ async function bundleCSS() {
 }
 
 function createProject() {
-  workWithHTML();
+  bundleHTML();
   copying(path.resolve(__dirname, 'assets'), path.resolve(targDir, 'assets'));
   bundleCSS();
 }

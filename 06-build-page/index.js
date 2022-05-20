@@ -35,7 +35,7 @@ function checkHTML(HTML) {
   }
 }
 
-async function bundleHTML() {
+function bundleHTML() {
   let readStream = fs.createReadStream(path.resolve(__dirname, 'template.html'), 'utf-8');
   let HTML = '';
   readStream.on('data', (chunk) => HTML += chunk);
@@ -51,29 +51,38 @@ function fileCopy (curDir, targDir, file) {
 }
 
 async function copying(curDir, targDir) {
-  await fs.promises.mkdir(targDir, { recursive: true });
-  let files = await fsProm.readdir(curDir, {withFileTypes: true});
-  for (let el of files) {
-    if (el.isFile()) {
-      fileCopy(curDir, targDir, el);
-    } else {
-      copying(path.join(curDir, el.name), path.join(targDir, el.name));
+  try {
+    await fs.promises.mkdir(targDir, { recursive: true });
+    let files = await fsProm.readdir(curDir, {withFileTypes: true});
+    for (let el of files) {
+      if (el.isFile()) {
+        fileCopy(curDir, targDir, el);
+      } else {
+        copying(path.join(curDir, el.name), path.join(targDir, el.name));
+      }
     }
+  } catch (error) {
+    console.log(`Error with copy files ${error}`);
   }
+
 }
 
 async function bundleCSS() {
-  const writeStream = fs.createWriteStream(path.resolve(targDir, 'style.css'));
-  const files = await fsProm.readdir(styleDir, {withFileTypes: true});
-  files.forEach(el => {
-    if(el.isFile()) {
-      const filePath = path.resolve(styleDir, el.name);
-      if (path.extname(filePath) === '.css') {
-        const readStream = fs.createReadStream(filePath);
-        readStream.pipe(writeStream);
+  try {
+    const writeStream = fs.createWriteStream(path.resolve(targDir, 'style.css'));
+    const files = await fsProm.readdir(styleDir, {withFileTypes: true});
+    files.forEach(el => {
+      if(el.isFile()) {
+        const filePath = path.resolve(styleDir, el.name);
+        if (path.extname(filePath) === '.css') {
+          const readStream = fs.createReadStream(filePath);
+          readStream.pipe(writeStream);
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.log(`Error in bundleCSS: ${error}`);
+  }
 }
 
 function createProject() {

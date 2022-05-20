@@ -76,7 +76,7 @@ async function bundleCSS() {
         const filePath = path.resolve(styleDir, el.name);
         if (path.extname(filePath) === '.css') {
           const readStream = fs.createReadStream(filePath);
-          readStream.pipe(writeStream);
+          readStream.pipe(writeStream, {end: false});
         }
       }
     });

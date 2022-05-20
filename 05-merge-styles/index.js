@@ -13,7 +13,7 @@ async function bundle() {
       const filePath = path.resolve(curDir, el.name);
       if (path.extname(filePath) === '.css') {
         const readStream = fs.createReadStream(filePath);
-        readStream.pipe(writeStream);
+        readStream.pipe(writeStream, {end: false});
       }
     }
   });

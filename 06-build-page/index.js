@@ -70,7 +70,8 @@ async function copying(curDir, targDir) {
 async function bundleCSS() {
   try {
     const writeStream = fs.createWriteStream(path.resolve(targDir, 'style.css'));
-    const files = await fsProm.readdir(styleDir, {withFileTypes: true});
+    let files = await fsProm.readdir(styleDir, {withFileTypes: true});
+    files = files.reverse();
     files.forEach(el => {
       if(el.isFile()) {
         const filePath = path.resolve(styleDir, el.name);
